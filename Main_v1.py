@@ -23,7 +23,7 @@ class Converter:
 
         # Heading (row 0)
         self.currency_heading = Label(self.currency_frame,
-                                      text="Currency Converter",
+                                      text="SchmeckleTwister: Currency for Clowns  ",
                                       font=("Arial", "16", "bold"))
         self.currency_heading.grid(row=0)
 
@@ -55,7 +55,7 @@ class Converter:
             ["To USD", "#009900", partial(self.check_currency, 1), 0, 1],
             ["To GBP", "#003366", partial(self.check_currency, 2), 0, 2],
             ["Help / Info", "#CC6600", self.to_help, 1, 0],
-            ["History / Export", "#004C99", self.to_history, 1, 1]
+            ["History / Export", "#004C99", self.to_history, 1, 2]
         ]
 
         # List to hold buttons once they have been made
@@ -78,8 +78,8 @@ class Converter:
 
     def check_currency(self, convert_mode):
         """
-        Checks currency is valid and either invokes calculation
-        function or shows a custom error
+        Checks currency is valid, limits input to 8 digits,
+        and either invokes calculation function or shows a custom error.
         """
         to_convert = self.currency_entry.get()
 
@@ -88,13 +88,18 @@ class Converter:
         self.currency_entry.config(bg="#FFFFFF")
 
         # Error checking
-        error = "Enter a valid number greater than or equal to 0"
+        error = "Enter a valid amount greater than 10 cents and no larger than 8 digits"
         has_errors = False
 
         try:
-            to_convert = float(to_convert)
-            if to_convert >= 0:
-                self.convert(convert_mode, to_convert)
+            # Check if input is a number
+            to_convert_float = float(to_convert)
+
+            # Remove decimal point and count digits only
+            digit_count = len(to_convert.replace(".", "").replace("-", ""))
+
+            if to_convert_float >= 0.1 and digit_count <= 8:
+                self.convert_currency(convert_mode, to_convert_float)
             else:
                 has_errors = True
         except ValueError:
@@ -106,7 +111,7 @@ class Converter:
             self.currency_entry.config(bg="#F4CCCC")
             self.currency_entry.delete(0, END)
 
-    def convert(self, convert_mode, to_convert):
+    def convert_currency(self, convert_mode, to_convert):
         """
         Performs the currency conversion based on the button clicked
         """
@@ -184,7 +189,8 @@ class HistoryExport:
         self.history_frame = Frame(self.history_box)
         self.history_frame.grid()
 
-        calc_amount = "all your" if len(calculations) <= 5 else f"your recent calculations - showing 5 / {len(calculations)}"
+        calc_amount = "all your" if len(calculations) <= 5 \
+            else f"your recent calculations - showing 5 / {len(calculations)}"
         recent_intro_txt = f"Below are {calc_amount} calculations."
 
         newest_first_list = list(reversed(calculations))
